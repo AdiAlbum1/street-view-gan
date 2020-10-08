@@ -1,6 +1,10 @@
 # PyCharm Folder
 .idea/
+__pycache__/
 
 # Large folders, don't upload
 images/*
 venv/*
+
+# Irrelevant folders
+metadata/
