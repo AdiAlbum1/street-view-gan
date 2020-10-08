@@ -1,0 +1,6 @@
+# PyCharm Folder
+.idea/
+
+# Large folders, don't upload
+images/*
+venv/*
