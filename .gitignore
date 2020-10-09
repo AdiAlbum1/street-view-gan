@@ -4,6 +4,9 @@ __pycache__/
 
 # Large folders, don't upload
 images/*
+train/*
+val/*
+test/*
 venv/*
 
 # Irrelevant folders
