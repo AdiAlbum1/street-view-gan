@@ -11,3 +11,5 @@ venv/*
 
 # Irrelevant folders
 metadata/
+gen_images/
+training_checkpoints/
