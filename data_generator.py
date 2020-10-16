@@ -23,6 +23,7 @@ class My_Data_Generator(Sequence):
         image_filenames = os.listdir(data_path)
         image_filenames = remove_non_forward_facing_images(image_filenames)
         random.shuffle(image_filenames)
+        image_filenames = image_filenames[0:500]
         self.image_filenames = image_filenames
 
         self.batch_size = batch_size
@@ -42,7 +43,7 @@ class My_Data_Generator(Sequence):
     def __getitem__(self, idx):
         batch_files = self.image_filenames[idx * self.batch_size : (idx + 1) * self.batch_size]
         batch_images = [cv2.imread(self.data_path + filename) for filename in batch_files]
-        batch_images = [cv2.resize(img, small_image_dimensions[::-1]) for img in batch_images]
+        batch_images = [cv2.resize(img, small_image_dimensions[::-1], interpolation=cv2.INTER_AREA) for img in batch_images]
         batch_images = (np.array(batch_images) - 127.5) / 127.5  # Normalize to [-1,1]
 
         batch_noise = np.random.normal(0, 1, (batch_size, random_vector_size))
@@ -56,7 +57,7 @@ class My_Data_Generator(Sequence):
             _, image_batch = self[i]
             for j in range(self.batch_size):
                 curr_image = np.uint8(((image_batch[j] + 1) * 127.5))
-                curr_image = cv2.resize(curr_image, (160, 128))
+                curr_image = cv2.resize(curr_image, (160, 128), interpolation=cv2.INTER_CUBIC)
                 cv2.imshow("images", curr_image)
                 k = cv2.waitKey(0)
                 if k == 27:

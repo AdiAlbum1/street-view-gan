@@ -41,15 +41,6 @@ if DEBUG:
     print("\nDISCRIMINATOR:")
     print(discriminator_model.summary())
 
-# # View Generator output
-if DEBUG:
-    noise = tf.random.normal([1, random_vector_size])
-    generated_image = generator_model(noise, training=False)[0]
-    generated_image = np.uint8(((generated_image + 1) * 127.5))
-    generated_image = cv2.resize(generated_image, (160, 128))
-    cv2.imshow("generated_image", generated_image)
-    cv2.waitKey(0)
-
 
 # Define loss & optimizer
 cross_entropy = tf.keras.losses.BinaryCrossentropy(from_logits=True)
@@ -87,24 +78,6 @@ def train_step(batch):
         gradients_of_discriminator = disc_tape.gradient(disc_loss, discriminator_model.trainable_variables)
         discriminator_optimizer.apply_gradients(zip(gradients_of_discriminator, discriminator_model.trainable_variables))
 
-# Notice the use of `tf.function`
-# This annotation causes the function to be "compiled".
-@tf.function
-def train_step_generator(batch):
-    with tf.GradientTape() as gen_tape:
-        noise, real_images = batch
-
-        generated_images = generator_model(noise, training=True)
-
-        real_output = discriminator_model(real_images, training=True)
-        fake_output = discriminator_model(generated_images, training=True)
-
-        gen_loss = generator_loss(fake_output)
-        disc_loss = discriminator_loss(real_output, fake_output)
-
-        gradients_of_generator = gen_tape.gradient(gen_loss, generator_model.trainable_variables)
-        generator_optimizer.apply_gradients(zip(gradients_of_generator, generator_model.trainable_variables))
-
 def calculate_batch_loss(batch):
     noise, real_images = batch
 
@@ -137,13 +110,8 @@ def train(train_dataset, val_dataset, epochs):
 
         print("EPOCH #"+str(epoch+1))
         # TRAIN
-        if epoch % 2 != 0:
-            for batch in train_dataset:
-                train_step_generator(batch)
-
-        else:
-            for batch in train_dataset:
-                train_step(batch)
+        for batch in train_dataset:
+            train_step(batch)
 
         # CALCULATE EPOCH LOSS
         train_gen_loss, train_disc_loss = calculate_dataset_loss(train_dataset)
@@ -157,7 +125,7 @@ def train(train_dataset, val_dataset, epochs):
         noise = tf.random.normal([1, random_vector_size])
         generated_image = generator_model(noise, training=False)[0]
         generated_image = np.uint8(((generated_image + 1) * 127.5))
-        generated_image = cv2.resize(generated_image, (160, 128))
+        generated_image = cv2.resize(generated_image, (160, 128), interpolation=cv2.INTER_CUBIC)
         # cv2.imshow("generated_image", generated_image)
         cv2.imwrite("gen_images//image_epoch_"+str(epoch)+".png", generated_image)
         # cv2.waitKey(0)
