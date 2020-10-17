@@ -7,11 +7,8 @@ import random
 
 from constants import *
 
-from data_generator import My_Data_Generator
+from data_generator import My_Data_Generator, load_all_images, define_batches
 from models import make_generator_small_model, make_discriminator_small_model
-
-from progressbar import ProgressBar
-pbar = ProgressBar()
 
 def discriminator_loss(real_output, fake_output):
     real_loss = cross_entropy(tf.ones_like(real_output), real_output)
@@ -23,12 +20,17 @@ def generator_loss(fake_output):
     return cross_entropy(tf.ones_like(fake_output), fake_output)
 
 # Load dataset to image_generator
-train_image_generator = My_Data_Generator(train_path, batch_size)
-val_image_generator = My_Data_Generator(val_path, batch_size)
+# train_image_generator = My_Data_Generator(train_path, batch_size)
+# val_image_generator = My_Data_Generator(val_path, batch_size)
+
+train_images = load_all_images(train_path)
+train_batches = define_batches(train_images, batch_size)
+val_images = load_all_images(val_path)
+val_batches = define_batches(val_images, batch_size)
 
 # View dataset
-if DEBUG:
-    train_image_generator.visualizer()
+# if DEBUG:
+#     train_image_generator.visualizer()
 
 # Define Models
 generator_model = make_generator_small_model(batch_size)
@@ -55,7 +57,7 @@ checkpoint = tf.train.Checkpoint(generator_optimizer=generator_optimizer,
                                  generator=generator_model,
                                  discriminator=discriminator_model)
 
-EPOCHS = 50
+EPOCHS = 400
 
 # Notice the use of `tf.function`
 # This annotation causes the function to be "compiled".
@@ -104,9 +106,11 @@ def calculate_dataset_loss(dataset):
 
     return gen_loss, disc_loss
 
-def train(train_dataset, val_dataset, epochs):
+def train(train_images, val_images, epochs):
     for epoch in range(epochs):
         start = time.time()
+        train_dataset = define_batches(train_images, batch_size)
+        val_dataset = define_batches(val_images, batch_size)
 
         print("EPOCH #"+str(epoch+1))
         # TRAIN
@@ -133,11 +137,11 @@ def train(train_dataset, val_dataset, epochs):
         print('Time for epoch {} is {} sec'.format(epoch + 1, time.time()-start))
 
 print("PRE TRAINING LOSS")
-train_gen_loss, train_disc_loss = calculate_dataset_loss(train_image_generator)
-val_gen_loss, val_disc_loss = calculate_dataset_loss(val_image_generator)
+train_gen_loss, train_disc_loss = calculate_dataset_loss(train_batches)
+val_gen_loss, val_disc_loss = calculate_dataset_loss(val_batches)
 print("\tTRAIN:\tgenerator_loss: ", train_gen_loss, " discriminator_loss: ", train_disc_loss)
 print("\tVAL:\tgenerator_loss: ", val_gen_loss, " discriminator_loss: ", val_disc_loss)
 
 print("START TRAINING")
-train(train_image_generator, val_image_generator, EPOCHS)
+train(train_images, val_images, EPOCHS)
 

@@ -47,15 +47,15 @@ def make_generator_small_model(batch_size):
     model.add(BatchNormalization())
     model.add(LeakyReLU())
 
-    model.add(Conv2DTranspose(16, (5, 5), strides=(2, 2), padding='same'))
-    assert model.output_shape == (batch_size, 80, 64, 16)
-    model.add(BatchNormalization())
-    model.add(LeakyReLU())
-
-    model.add(Conv2DTranspose(16, (5, 5), strides=(1, 1), padding='same'))
-    assert model.output_shape == (batch_size, 80, 64, 16)
-    model.add(BatchNormalization())
-    model.add(LeakyReLU())
+    # model.add(Conv2DTranspose(16, (5, 5), strides=(2, 2), padding='same'))
+    # assert model.output_shape == (batch_size, 80, 64, 16)
+    # model.add(BatchNormalization())
+    # model.add(LeakyReLU())
+    #
+    # model.add(Conv2DTranspose(16, (5, 5), strides=(1, 1), padding='same'))
+    # assert model.output_shape == (batch_size, 80, 64, 16)
+    # model.add(BatchNormalization())
+    # model.add(LeakyReLU())
 
     model.add(Conv2DTranspose(3, (3, 3), strides=(1, 1), padding='same', use_bias=False, activation=tanh))
     assert model.output_shape == (batch_size, small_image_dimensions[0], small_image_dimensions[1], 3)
@@ -64,20 +64,19 @@ def make_generator_small_model(batch_size):
 
 def make_discriminator_small_model():
     model = tf.keras.Sequential()
-    model.add(Conv2D(128, (5, 5), strides=(2, 2), padding='same',
+    model.add(Conv2D(128, (5, 5), strides=(1, 1), padding='same',
                      input_shape=[small_image_dimensions[0], small_image_dimensions[1], 3]))
     model.add(BatchNormalization())
     model.add(LeakyReLU())
-    # 40, 32
+
+    model.add(Conv2D(128, (5, 5), strides=(2, 2), padding='same'))
+    model.add(BatchNormalization())
+    model.add(LeakyReLU())
+    # 20, 16
 
     model.add(Conv2D(64, (5,5), strides=(1,1), padding='same'))
     model.add(BatchNormalization())
     model.add(LeakyReLU())
-
-    model.add(Conv2D(64, (5,5), strides=(2,2), padding='same'))
-    model.add(BatchNormalization())
-    model.add(LeakyReLU())
-    # 20, 16
 
     model.add(Conv2D(32, (5,5), strides=(2,2), padding='same'))
     model.add(BatchNormalization())

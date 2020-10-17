@@ -4,10 +4,10 @@ test_path = "test/"
 
 image_dimensions = (320, 256)
 
-small_image_dimensions = (80, 64)
+small_image_dimensions = (40, 32)
 
 random_vector_size = 100
 
-batch_size = 128
+batch_size = 64
 
 DEBUG = False
